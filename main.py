@@ -32,4 +32,14 @@ data = response.json()
 #     json.dump(data, f, indent=2)
 
 asteroids = data["near_earth_objects"][start_date]
-print(f"Number of asteroids on {start_date}: {len(asteroids)}")
+df = pd.json_normalize(asteroids)
+df_main = df[[
+    'neo_reference_id',
+    'name',
+    'absolute_magnitude_h',
+    'is_potentially_hazardous_asteroid',
+    'estimated_diameter.kilometers.estimated_diameter_min',
+    'estimated_diameter.kilometers.estimated_diameter_max'
+]]
+
+print(df_main.head())
