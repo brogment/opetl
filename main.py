@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 import requests
 import pandas as pd
 import json
+pd.set_option('display.max_columns', None)
 
 load_dotenv()
 
@@ -38,8 +39,19 @@ df_main = df[[
     'name',
     'absolute_magnitude_h',
     'is_potentially_hazardous_asteroid',
-    'estimated_diameter.kilometers.estimated_diameter_min',
-    'estimated_diameter.kilometers.estimated_diameter_max'
-]]
+    'estimated_diameter.meters.estimated_diameter_min',
+    'estimated_diameter.meters.estimated_diameter_max'
+]].copy()
+
+df_main.rename(columns={
+    'estimated_diameter.meters.estimated_diameter_min': 'diameter_min_m',
+    'estimated_diameter.meters.estimated_diameter_max': 'diameter_max_m'
+}, inplace=True)
+
+df_main['name'] = df_main['name'].str.extract(r'\(([^)]+)\)')
+df_main['diameter_min_m'] = df_main['diameter_min_m'].round(0).astype(int)
+df_main['diameter_max_m'] = df_main['diameter_max_m'].round(0).astype(int)
+
+
 
 print(df_main.head())
