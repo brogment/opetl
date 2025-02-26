@@ -52,6 +52,18 @@ df_main['name'] = df_main['name'].str.extract(r'\(([^)]+)\)')
 df_main['diameter_min_m'] = df_main['diameter_min_m'].round(0).astype(int)
 df_main['diameter_max_m'] = df_main['diameter_max_m'].round(0).astype(int)
 
+close_approach_rows = []
+for index, asteroid in df.iterrows():
+    neo_id = asteroid['neo_reference_id']
+    for event in asteroid.get("close_approach_data", []):
+        row = {
+            "neo_reference_id": neo_id,
+            "close_approach_date": event.get("close_approach_date"),
+            "relative_velocity_kpm": event.get("relative_velocity", {}).get("kilometers_per_hour"),
+            "miss_distance_km": event.get("miss_distance", {}).get("kilometers")
+        }
+        close_approach_rows.append(row)
+df_close_approach = pd.DataFrame(close_approach_rows)
 
-
-print(df_main.head())
+df_close_approach['relative_velocity_kpm'] = df_close_approach['relative_velocity_kpm'].round(2)
+df_close_approach['miss_distance_km'] = df_close_approach['miss_distance_km'].round(2)
