@@ -14,7 +14,10 @@ import os
 from dotenv import load_dotenv
 import requests
 import pandas as pd
-import json
+# import json
+import sqlite3
+import matplotlib.pyplot as plt
+
 pd.set_option('display.max_columns', None)
 
 load_dotenv()
@@ -67,3 +70,21 @@ df_close_approach = pd.DataFrame(close_approach_rows)
 
 df_close_approach['relative_velocity_kpm'] = df_close_approach['relative_velocity_kpm'].round(2)
 df_close_approach['miss_distance_km'] = df_close_approach['miss_distance_km'].round(2)
+
+
+# database connection
+conn = sqlite3.connect("nasa_neo.db")
+df_main.to_sql("asteroids", conn, if_exists="replace", index=False)
+df_close_approach.to_sql("close_approach", conn, if_exists="replace", index=False)
+
+df_asteroids = pd.read_sql_query("SELECT * FROM asteroids", conn)
+
+conn.close()
+
+# plotting histogram
+
+plt.hist(df_asteroids["absolute_magnitude_h"].dropna(), bins=20, edgecolor="black")
+plt.title("Distribution of Absolute Magnitude")
+plt.xlabel("Absolute Magnitude (H)")
+plt.ylabel("Frequency")
+plt.show()
