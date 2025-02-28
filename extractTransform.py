@@ -1,7 +1,6 @@
 import requests
 import pandas as pd
 import os
-
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -12,31 +11,45 @@ def fetch_neo_data(start_date, end_date):
     response = requests.get(url)
     data = response.json()
 
-    asteroids = []
-    for date, asteroid_list in data["near_earth_objects"].items():
-        asteroids.extend(asteroid_list)
-    return asteroids
+    # Combine data from all dates into one list
+    all_asteroids = []
+    for date, asteroids in data["near_earth_objects"].items():
+        all_asteroids.extend(asteroids)
+    df = pd.json_normalize(all_asteroids)
+    return df
 
-def create_main_df(asteroids):
-    df = pd.json_normalize(asteroids)
+def create_main_df(df):
     df_main = df[[
         'neo_reference_id',
         'name',
         'absolute_magnitude_h',
         'is_potentially_hazardous_asteroid',
-        'estimated_diameter.meters.estimated_diameter_min',
-        'estimated_diameter.meters.estimated_diameter_max'
+        'estimated_diameter.kilometers.estimated_diameter_min',
+        'estimated_diameter.kilometers.estimated_diameter_max'
     ]].copy()
-
     df_main.rename(columns={
-        'estimated_diameter.meters.estimated_diameter_min': 'diameter_min_m',
-        'estimated_diameter.meters.estimated_diameter_max': 'diameter_max_m'
+        'estimated_diameter.kilometers.estimated_diameter_min': 'diameter_min_km',
+        'estimated_diameter.kilometers.estimated_diameter_max': 'diameter_max_km'
     }, inplace=True)
-
-    df_main['name'] = df_main['name'].str.extract(r'\(([^)]+)\)')
-    df_main['diameter_min_m'] = df_main['diameter_min_m'].round(0).astype(int)
-    df_main['diameter_max_m'] = df_main['diameter_max_m'].round(0).astype(int)
+    df_main['diameter_min_km'] = df_main['diameter_min_km'].round(0).astype(int)
+    df_main['diameter_max_km'] = df_main['diameter_max_km'].round(0).astype(int)
 
     return df_main
 
-def create_close_approach_df(asteroids):
+
+def create_close_approach_df(df):
+    rows = []
+    for asteroid in df:
+        neo_id = asteroid.get("neo_reference_id")
+        for event in asteroid.get("close_approach_data", []):
+            row = {
+                "neo_reference_id": neo_id,
+                "close_approach_date": event.get("close_approach_date"),
+                "relative_velocity_kph": event.get("relative_velocity", {}).get("kilometers_per_hour"),
+                "miss_distance_km": event.get("miss_distance", {}).get("kilometers")
+            }
+            rows.append(row)
+    df_close_approach = pd.DataFrame(rows)
+    df_close_approach['relative_velocity_kpm'] = df_close_approach['relative_velocity_kpm'].round(2)
+    df_close_approach['miss_distance_km'] = df_close_approach['miss_distance_km'].round(2)
+    return df_close_approach
