@@ -35,7 +35,11 @@ data = response.json()
 # with open("neo_data.json","w") as f:
 #     json.dump(data, f, indent=2)
 
-asteroids = data["near_earth_objects"][start_date]
+# asteroids = data["near_earth_objects"][start_date]
+asteroids = []
+for date, asteroid_list in data["near_earth_objects"].items():
+    asteroids.extend(asteroid_list)
+
 df = pd.json_normalize(asteroids)
 df_main = df[[
     'neo_reference_id',
