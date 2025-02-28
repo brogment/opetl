@@ -15,5 +15,6 @@ def serve_layout():
             html.Button('Submit', id='submit-button')
         ]),
         dcc.Graph(id='asteroid-chart'),
+        dcc.Graph(id='close-approach-chart'),
         html.Div(id='output-data')
     ])

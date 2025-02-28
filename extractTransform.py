@@ -11,14 +11,14 @@ def fetch_neo_data(start_date, end_date):
     response = requests.get(url)
     data = response.json()
 
-    # Combine data from all dates into one list
-    all_asteroids = []
-    for date, asteroids in data["near_earth_objects"].items():
-        all_asteroids.extend(asteroids)
-    df = pd.json_normalize(all_asteroids)
-    return df
+    asteroids = []
+    for date, asteroids_list in data["near_earth_objects"].items():
+        asteroids.extend(asteroids_list)
+    
+    return asteroids
 
-def create_main_df(df):
+def create_main_df(asteroids):
+    df = pd.json_normalize(asteroids)
     df_main = df[[
         'neo_reference_id',
         'name',
@@ -36,10 +36,9 @@ def create_main_df(df):
 
     return df_main
 
-
-def create_close_approach_df(df):
+def create_close_approach_df(asteroids):
     rows = []
-    for asteroid in df:
+    for asteroid in asteroids:
         neo_id = asteroid.get("neo_reference_id")
         for event in asteroid.get("close_approach_data", []):
             row = {
@@ -50,6 +49,6 @@ def create_close_approach_df(df):
             }
             rows.append(row)
     df_close_approach = pd.DataFrame(rows)
-    df_close_approach['relative_velocity_kpm'] = df_close_approach['relative_velocity_kpm'].round(2)
+    df_close_approach['relative_velocity_kph'] = df_close_approach['relative_velocity_kph'].round(2)
     df_close_approach['miss_distance_km'] = df_close_approach['miss_distance_km'].round(2)
     return df_close_approach
