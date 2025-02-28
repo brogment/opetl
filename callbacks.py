@@ -8,8 +8,8 @@ def register_callbacks(app):
         Output('asteroid-chart', 'figure'),
         Output('output-data', 'children'),
         Input('submit-button', 'n_clicks'),
-        State('start-date', 'value'),
-        State('end-date', 'value')
+        State('date-picker-range', 'start_date'),
+        State('date-picker-range', 'end_date')
     )
     def update_dashboard(n_clicks, start_date, end_date):
         if not n_clicks:

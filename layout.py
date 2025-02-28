@@ -4,17 +4,13 @@ def serve_layout():
     return html.Div([
         html.H1("NASA NeoWs Dashboard"),
         html.Div([
-            dcc.Input(
-                id='start-date',
-                type='text',
-                placeholder='Start Date (YYYY-MM-DD)',
-                value='2015-01-01'
-            ),
-            dcc.Input(
-                id='end-date',
-                type='text',
-                placeholder='End Date (YYYY-MM-DD)',
-                value='2015-01-07'
+            dcc.DatePickerRange(
+                id='date-picker-range',
+                start_date_placeholder_text='Start Date (YYYY-MM-DD)',
+                end_date_placeholder_text='End Date (YYYY-MM-DD)',
+                display_format='YYYY-MM-DD',
+                start_date='2025-01-01',
+                end_date = '2025-01-07'
             ),
             html.Button('Submit', id='submit-button')
         ]),
