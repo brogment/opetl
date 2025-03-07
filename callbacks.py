@@ -14,19 +14,18 @@ def register_callbacks(app):
     )
     def update_dashboard(n_clicks, start_date, end_date):
         if not n_clicks:
-            # Return empty chart and text on initial load
-            return {}, "Enter a date range and press submit."
+            return {}, {}, "Enter a date range and press submit."
 
-        # Fetch and process data using functions from etl.py
         asteroids = fetch_neo_data(start_date, end_date)
         df_main = create_main_df(asteroids)
         df_close_approach = create_close_approach_df(asteroids)
 
-        # Create a histogram of absolute magnitude using Plotly Express
         fig1 = px.histogram(df_main,
                             x='absolute_magnitude_h',
                             nbins=20,
-                            title='Distribution of Absolute Magnitude')
+                            title='Distribution of Absolute Magnitude',
+                            labels={"absolute_magnitude_h": "Absolute Magnitude"})
+        fig1.update_layout(yaxis_title="Asteroid Count")
         fig2 = px.scatter(df_close_approach,
                           x = 'miss_distance_km',
                           y = 'relative_velocity_kph',
@@ -35,6 +34,7 @@ def register_callbacks(app):
                               "miss_distance_km": "Miss Distance (km)",
                               "relative_velocity_kph": "Relative Velocity (km/h)"
                           })
-
+        fig2.update_xaxes(tickformat=",.2f")
+        fig2.update_yaxes(tickformat=",.2f")
         summary_text = f"Total asteroids: {len(df_main)} | Total close approaches {len(df_close_approach)}"
         return fig1, fig2, summary_text

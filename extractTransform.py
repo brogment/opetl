@@ -49,6 +49,10 @@ def create_close_approach_df(asteroids):
             }
             rows.append(row)
     df_close_approach = pd.DataFrame(rows)
+
+    df_close_approach['relative_velocity_kph'] = pd.to_numeric(df_close_approach['relative_velocity_kph'],errors='coerce')
+    df_close_approach['miss_distance_km'] = pd.to_numeric(df_close_approach['miss_distance_km'], errors='coerce')
+
     df_close_approach['relative_velocity_kph'] = df_close_approach['relative_velocity_kph'].round(2)
     df_close_approach['miss_distance_km'] = df_close_approach['miss_distance_km'].round(2)
     return df_close_approach
